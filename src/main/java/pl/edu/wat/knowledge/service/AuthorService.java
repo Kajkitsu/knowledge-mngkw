@@ -7,6 +7,7 @@ import pl.edu.wat.knowledge.dto.AuthorRequest;
 import pl.edu.wat.knowledge.dto.AuthorResponse;
 import pl.edu.wat.knowledge.entity.Author;
 import pl.edu.wat.knowledge.exception.EntityNotFound;
+import pl.edu.wat.knowledge.mapper.AuthorMapper;
 import pl.edu.wat.knowledge.repository.AuthorRepository;
 
 import java.util.List;
@@ -15,34 +16,31 @@ import java.util.Optional;
 @Service
 public class AuthorService {
     private final AuthorRepository authorRepository;
+    private final AuthorMapper authorMapper;
 
     @Autowired
-    public AuthorService(AuthorRepository authorRepository) {
+    public AuthorService(AuthorRepository authorRepository, AuthorMapper authorMapper) {
         this.authorRepository = authorRepository;
+        this.authorMapper = authorMapper;
     }
 
     public Optional<AuthorResponse> getAuthorById(String id) {
         return authorRepository.findById(id)
-                .map(author -> new AuthorResponse(author.getId(), author.getName(), author.getSurname()));
+                .map(authorMapper::map);
     }
 
     public AuthorResponse save(AuthorRequest authorRequest) {
-        Author author = new Author();
-        author.setName(authorRequest.getName());
-        author.setSurname(authorRequest.getSurname());
-        author.setPesel(authorRequest.getPesel());
-        System.out.println(author);
+        Author author = authorMapper.map(authorRequest);
         author = authorRepository.save(
                 author
         );
-        System.out.println(author);
-        return new AuthorResponse(author.getId(), author.getName(), author.getSurname());
+        return authorMapper.map(author);
     }
 
     public List<AuthorResponse> getAll() {
         return authorRepository.findAll()
                 .stream()
-                .map(author -> new AuthorResponse(author.getId(), author.getName(), author.getSurname()))
+                .map(authorMapper::map)
                 .toList();
     }
 
@@ -57,6 +55,6 @@ public class AuthorService {
         }
 
         author = authorRepository.save(author);
-        return new AuthorResponse(author.getId(), author.getName(), author.getSurname());
+        return authorMapper.map(author);
     }
 }

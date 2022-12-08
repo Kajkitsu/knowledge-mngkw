@@ -48,7 +48,6 @@ public class ArticleService {
                 .orElseThrow(EntityNotFound::new);
 
         article.setAuthorId(author.getId());
-        System.out.println(article);
         article = articleRepository.save(
                 article
         );
